@@ -22,7 +22,6 @@ int main(int argc, char *argv[])
                              // mesajul trimis
   char server_msg[800] = "";
   char client_msg[800] = "";
-  char buf[800];
 
   /* exista toate argumentele in linia de comanda? */
   if (argc != 3)
@@ -69,12 +68,13 @@ int main(int argc, char *argv[])
 
     /* citirea mesajului */
     printf("[client]Command: ");
+    strcpy(client_msg, "");
     fflush(stdout);
-    read(0, buf, sizeof(buf));
-    client_msg[0] = '\0';
-    strcpy(client_msg ,buf);
+    read(0, client_msg, sizeof(client_msg));
+    //client_msg[strlen(client_msg) - 1] = '\0';
+    
 
-    printf("[client] We got:  %s\n", client_msg);
+    printf("[client]We got [%s]\n", client_msg);
 
     /* trimiterea mesajului la server */
     if (write(sd, &client_msg, sizeof(char[800])) <= 0)

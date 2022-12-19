@@ -127,6 +127,7 @@ void raspunde(void *arg)
   int i = 0;
   char client_msg[800] = "";
   char server_msg[800] = "";
+  int id_person = 0;
 
   struct thData tdL;
   tdL = *((struct thData *)arg);
@@ -135,9 +136,6 @@ void raspunde(void *arg)
 
   while (1)
   {
-    /*pregatim mesajul de raspuns */
-
-    // printf("[Thread %d]Message from server: %s\n", tdL.idThread, welcome);
     strcat(server_msg, welcome);
 
     if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
@@ -156,27 +154,126 @@ void raspunde(void *arg)
     }
     printf("[Thread %d]Message from client: %s\n", tdL.idThread, client_msg);
 
-    // edit password command
-    //  if(strcmp(client_msg, "5") == 0){
-    //    strcpy(server_msg, "Enter the name of the password you want to edit: ");
-    //    if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
-    //    {
-    //      printf("[Thread %d] ", tdL.idThread);
-    //      perror("[Thread]Error at write() to client.\n");
-    //    }
-    //    else
-    //      printf("[Thread %d]Message sent.\n", tdL.idThread);
-
-    //   strcpy(client_msg, "");
-    //   if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
-    //   {
-    //     printf("[Thread %d]\n", tdL.idThread);
-    //     perror("Error at read() from client.\n");
-    //   }
-    // }
     server_msg[0] = '\0';
-    char *info = viewPassword(people, 1, "csgo");
-    strcpy(server_msg, info);
+
+    // register or login command
+    if (strcmp(client_msg, "1") == 0 || strcmp(client_msg, "2") == 0 )
+    {
+      printf("[Thread %d]Register command.\n", tdL.idThread);
+      char username[800] = "";
+      char password[800] = "";
+      int done = 0;
+
+      while (done == 0)
+      {
+        if (username[0] == '\0')
+          strcpy(server_msg, "Enter username.\n");
+        else if (password[0] == '\0')
+          strcpy(server_msg, "Enter master password.\n");
+
+        if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
+        {
+          printf("[Thread %d] ", tdL.idThread);
+          perror("[Thread]Error at write() to client.\n");
+        }
+        else
+          printf("[Thread %d]Message sent.\n", tdL.idThread);
+
+        strcpy(client_msg, "");
+        if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+        {
+          printf("[Thread %d]\n", tdL.idThread);
+          perror("Error at read() from client.\n");
+        }
+        printf("[Thread %d]Message from client: %s\n", tdL.idThread, client_msg);
+
+        if (username[0] == '\0')
+          strcpy(username, client_msg);
+        else if (password[0] == '\0')
+        {
+          strcpy(password, client_msg);
+          if(strcmp(client_msg, "1") == 0 ){
+            //register
+            strcpy(server_msg, "Registered and connected\n");
+            id_person = 1;
+          }
+          else{
+            //login
+            int check = loginPerson(people, username, password);
+            if(check == 0){
+              strcpy(server_msg, "User does not exist\n");
+            }
+            else if(check == -1){
+              strcpy(server_msg, "Wrong password\n");
+            }
+            else{
+              strcpy(server_msg, "Connected\n");
+              id_person = check;
+            }
+            
+          }
+          done = 1;
+          
+        }
+      }
+    }
+    else
+      // edit password command
+      if (strcmp(client_msg, "5") == 0)
+      {
+        printf("[Thread %d]Edit password command.\n", tdL.idThread);
+        char title[800] = "";
+        char field[800] = "";
+        int done = 0;
+
+        if(id_person == 0){
+          strcpy(server_msg, "Not logged in.\n");
+        }
+
+        while (done == 0 && id_person != 0)
+        {
+          if (title[0] == '\0')
+            strcpy(server_msg, "Enter the title of the password you want to edit.\n ");
+          else if (field[0] == '\0')
+            strcpy(server_msg, "Enter the field you want to edit.\n");
+          else
+            strcpy(server_msg, "Enter the new value.\n");
+
+          if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
+          {
+            printf("[Thread %d] ", tdL.idThread);
+            perror("[Thread]Error at write() to client.\n");
+          }
+          else
+            printf("[Thread %d]Message sent.\n", tdL.idThread);
+
+          strcpy(client_msg, "");
+          if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+          {
+            printf("[Thread %d]\n", tdL.idThread);
+            perror("Error at read() from client.\n");
+          }
+
+          // delete \n from client_msg
+          client_msg[strlen(client_msg) - 2] = '\0';
+
+          if (title[0] == '\0')
+            strcpy(title, client_msg);
+          else if (field[0] == '\0')
+            strcpy(field, client_msg);
+          else
+          {
+            // people = editPassword(people, 1, title, field, client_msg);
+            // if(strcmp(field, title) == 0)
+            // strcpy(title, client_msg);
+            printf("title: %s %s", title, field);
+
+            // char *info = viewPassword(people, 1, title);
+            //  strcpy(server_msg, info);
+            done = 1;
+          }
+        }
+      }
   }
 }
 

@@ -252,3 +252,36 @@ int registerPerson(struct person *people, char *name, char *password)
     else
         return 0; //name already exists
 }
+
+int main()
+{
+    struct person input1 = {1, "alin", "69dsdfs", {"games", "school"}, {{"games", "csgo", "alintdg", "parola", "", "e veche"}, {"school", "docs", "alintutz", "parola22", "", "ok"}}};
+    struct person input2 = {2, "elena", "6sdsafs", {"games", "acasa"}, {{"games", "lol", "nebula", "alorap", "haide.com", ""}, {"games", "dbdl", "balenciaga", "parlica", "", "brnr"}}};
+
+
+    // struct person manyP[2] ={{1, "alin", "69dsdfs", {"games", "school"}, {{"games", "csgo", "alintdg", "parola", "", "e veche"}, {"school", "docs", "alintutz", "parola22", "", "ok"}}},{2, "elena", "6sdsafs", {"games", "acasa"}, {{"games", "lol", "nebula", "alorap", "haide.com", ""}, {"games", "dbdl", "balenciaga", "parlica", "", "brnr"}}}};
+
+    // deletePassword(2, "lol");
+
+    struct person *people = readFromFile();
+
+    // people = editPassword(people, 2, "lol", 2, "mario");
+
+
+    // for (int i = 0; i < sizeof(people); i++)
+    // {
+    //     if(people[i].id != 0){
+    //         printf("\n%s %s %s %s %s\n", people[i].name, people[i].passwords[0].title, people[i].passwords[0].passwrd, people[i].passwords[1].title, people[i].passwords[1].passwrd);
+    //     }
+    // }
+
+   // char* info = viewPassword(people,1,"csgo");
+    //printf("%s", info);
+    printf("%d", loginPerson(people, "alin", "69dsdfs"));
+
+    //addPeopleToFile(people);
+    // printf("%s %s %s\n", people[0].name, people[0].passwords->category ,people[0].passwords[0].passwrd);
+    // printf("%s %s %s %s\n", people[0].name, people[1].categories[0], people[1].categories[1], people[0].passwords[1].passwrd);
+
+    return 0;
+}
