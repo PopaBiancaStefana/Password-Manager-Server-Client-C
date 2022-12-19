@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include <stdint.h>
+#include "filereaderwriter.h"
 
 /* portul folosit */
 #define PORT 2908
@@ -24,6 +25,9 @@ typedef struct thData
 
 static void *treat(void *); /* functia executata de fiecare thread ce realizeaza comunicarea cu clientii */
 void raspunde(void *);
+void readFromClient(int, int);
+
+struct person *people;
 
 int main()
 {
@@ -70,6 +74,10 @@ int main()
     perror("[server]Error at listen().\n");
     return errno;
   }
+
+  // preluam datele din fisier
+  people = readFromFile();
+
   /* servim in mod concurent clientii...folosind thread-uri */
   while (1)
   {
@@ -116,22 +124,23 @@ static void *treat(void *arg)
 
 void raspunde(void *arg)
 {
-  int nr = 0,i  = 0;
+  int i = 0;
+  char client_msg[800] = "";
+  char server_msg[800] = "";
+
   struct thData tdL;
   tdL = *((struct thData *)arg);
 
-  char welcome[800] = "\n█▀█ ▄▀█ █▀ █▀ █░█░█ █▀█ █▀█ █▀▄   █▀▄▀█ ▄▀█ █▄░█ ▄▀█ █▀▀ █▀▀ █▀█\n█▀▀ █▀█ ▄█ ▄█ ▀▄▀▄▀ █▄█ █▀▄ █▄▀   █░▀░█ █▀█ █░▀█ █▀█ █▄█ ██▄ █▀▄\n\nWelcome!Type a number for a specific command\n\n1.register\n2.login\n3.logout\n4.Add password\n5.Edit password\n6.View password\n7.Delete password\n8.New category\n9.View category\n10.Change master password\n";
-  printf(welcome);
-
+  char welcome[800] = "\n\n█▀█ ▄▀█ █▀ █▀ █░█░█ █▀█ █▀█ █▀▄   █▀▄▀█ ▄▀█ █▄░█ ▄▀█ █▀▀ █▀▀ █▀█\n█▀▀ █▀█ ▄█ ▄█ ▀▄▀▄▀ █▄█ █▀▄ █▄▀   █░▀░█ █▀█ █░▀█ █▀█ █▄█ ██▄ █▀▄\n\nWelcome!Type a number for a specific command\n\n1.register\n2.login\n3.logout\n4.Add password\n5.Edit password\n6.View password\n7.Delete password\n8.New category\n9.View category\n10.Change master password\n\n";
 
   while (1)
   {
     /*pregatim mesajul de raspuns */
-    nr++;
-    printf("[Thread %d]Message from server: %s\n", tdL.idThread, welcome);   
 
-    /* returnam mesajul clientului */
-    if (write(tdL.cl, &welcome, sizeof(char[800])) <= 0)
+    // printf("[Thread %d]Message from server: %s\n", tdL.idThread, welcome);
+    strcat(server_msg, welcome);
+
+    if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
     {
       printf("[Thread %d] ", tdL.idThread);
       perror("[Thread]Error at write() to client.\n");
@@ -139,12 +148,47 @@ void raspunde(void *arg)
     else
       printf("[Thread %d]Message sent.\n", tdL.idThread);
 
-    if (read(tdL.cl, &nr, sizeof(int)) <= 0)
+    strcpy(client_msg, "");
+    if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
     {
       printf("[Thread %d]\n", tdL.idThread);
       perror("Error at read() from client.\n");
     }
+    printf("[Thread %d]Message from client: %s\n", tdL.idThread, client_msg);
 
-    printf("[Thread %d]Message from client: %d\n", tdL.idThread, nr);
+    // edit password command
+    //  if(strcmp(client_msg, "5") == 0){
+    //    strcpy(server_msg, "Enter the name of the password you want to edit: ");
+    //    if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
+    //    {
+    //      printf("[Thread %d] ", tdL.idThread);
+    //      perror("[Thread]Error at write() to client.\n");
+    //    }
+    //    else
+    //      printf("[Thread %d]Message sent.\n", tdL.idThread);
+
+    //   strcpy(client_msg, "");
+    //   if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+    //   {
+    //     printf("[Thread %d]\n", tdL.idThread);
+    //     perror("Error at read() from client.\n");
+    //   }
+    // }
+    server_msg[0] = '\0';
+    char *info = viewPassword(people, 1, "csgo");
+    strcpy(server_msg, info);
   }
+}
+
+void readFromClient(int fd, int idThread)
+{
+  char client_msg[800] = "";
+
+  if (read(fd, &client_msg, sizeof(char[800])) < 0)
+  {
+    printf("[Thread %d]\n", idThread);
+    perror("Error at read() from client.\n");
+  }
+
+  printf("::%s", client_msg);
 }

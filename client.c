@@ -20,8 +20,9 @@ int main(int argc, char *argv[])
   int sd;                    // descriptorul de socket
   struct sockaddr_in server; // structura folosita pentru conectare
                              // mesajul trimis
-  int nr = 0;
-  char buf[10];
+  char server_msg[800] = "";
+  char client_msg[800] = "";
+  char buf[800];
 
   /* exista toate argumentele in linia de comanda? */
   if (argc != 3)
@@ -55,31 +56,28 @@ int main(int argc, char *argv[])
     return errno;
   }
 
-  char message[800] = "";
 
   while(1){
-    /* citirea raspunsului dat de server
-      (apel blocant pina cind serverul raspunde) */
-    if (read(sd, &message, sizeof(char[800])) < 0)
+    /* citirea raspunsului dat de server (apel blocant pina cind serverul raspunde) */
+    if (read(sd, &server_msg, sizeof(char[800])) < 0)
     {
       perror("[client]Error at read() from server.\n");
       return errno;
     }
     /* afisam mesajul primit */
-    printf("[client]Message from server %s\n", message);
-
+    printf("[client]Message from server:\n\n%s\n", server_msg);
 
     /* citirea mesajului */
-    printf("[client]Introduceti un numar: ");
+    printf("[client]Command: ");
     fflush(stdout);
     read(0, buf, sizeof(buf));
-    nr = atoi(buf);
-    // scanf("%d",&nr);
+    client_msg[0] = '\0';
+    strcpy(client_msg ,buf);
 
-    printf("[client] Am citit %d\n", nr);
+    printf("[client] We got:  %s\n", client_msg);
 
     /* trimiterea mesajului la server */
-    if (write(sd, &nr, sizeof(int)) <= 0)
+    if (write(sd, &client_msg, sizeof(char[800])) <= 0)
     {
       perror("[client]Error at write() to server.\n");
       return errno;
