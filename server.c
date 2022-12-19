@@ -157,9 +157,11 @@ void raspunde(void *arg)
     server_msg[0] = '\0';
 
     // register or login command
-    if (strcmp(client_msg, "1") == 0 || strcmp(client_msg, "2") == 0 )
+    if ((strcmp(client_msg, "1") == 0 || strcmp(client_msg, "2") == 0) && id_person == 0)
     {
-      printf("[Thread %d]Register command.\n", tdL.idThread);
+      printf("[Thread %d]Register or login command: %s\n", tdL.idThread, client_msg);
+      char command[800] = "";
+      strcpy(command, client_msg);
       char username[800] = "";
       char password[800] = "";
       int done = 0;
@@ -167,9 +169,9 @@ void raspunde(void *arg)
       while (done == 0)
       {
         if (username[0] == '\0')
-          strcpy(server_msg, "Enter username.\n");
+          strcpy(server_msg, "Enter username:\n");
         else if (password[0] == '\0')
-          strcpy(server_msg, "Enter master password.\n");
+          strcpy(server_msg, "Enter master password:\n");
 
         if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
         {
@@ -192,28 +194,38 @@ void raspunde(void *arg)
         else if (password[0] == '\0')
         {
           strcpy(password, client_msg);
-          if(strcmp(client_msg, "1") == 0 ){
-            //register
+          if (strcmp(command, "1") == 0)
+          {
+
+            // register
+            printf("\nINAINTE %d\n", getNumberOfPeople(people));
+            *people = registerPerson(people, username, password);
+            
             strcpy(server_msg, "Registered and connected\n");
-            id_person = 1;
+            id_person = people[getNumberOfPeople(people) - 1].id;
+
+            printf("\nDUPA %d  : id %d\n", getNumberOfPeople(people), id_person);
           }
-          else{
-            //login
+          else
+          {
+
+            // login
             int check = loginPerson(people, username, password);
-            if(check == 0){
+            if (check == 0)
+            {
               strcpy(server_msg, "User does not exist\n");
             }
-            else if(check == -1){
+            else if (check == -1)
+            {
               strcpy(server_msg, "Wrong password\n");
             }
-            else{
+            else
+            {
               strcpy(server_msg, "Connected\n");
               id_person = check;
             }
-            
           }
           done = 1;
-          
         }
       }
     }
@@ -226,18 +238,19 @@ void raspunde(void *arg)
         char field[800] = "";
         int done = 0;
 
-        if(id_person == 0){
+        if (id_person == 0)
+        {
           strcpy(server_msg, "Not logged in.\n");
         }
 
         while (done == 0 && id_person != 0)
         {
           if (title[0] == '\0')
-            strcpy(server_msg, "Enter the title of the password you want to edit.\n ");
+            strcpy(server_msg, "Enter the title of the password you want to edit:\n ");
           else if (field[0] == '\0')
-            strcpy(server_msg, "Enter the field you want to edit.\n");
+            strcpy(server_msg, "Enter the field you want to edit:\n");
           else
-            strcpy(server_msg, "Enter the new value.\n");
+            strcpy(server_msg, "Enter the new value:\n");
 
           if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
           {

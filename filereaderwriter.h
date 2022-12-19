@@ -87,8 +87,8 @@ struct person *readFromFile()
     int count = 0;
     while (fread(&input, sizeof(struct person), 1, infile))
     {
-        // printf("id = %d name = %s %s %s %s\n", input.id,
-        //  input.name, input.categories[1], input.passwords[0].title, input.passwords[1].title);
+       // printf("id = %d name = %s %s %s %s\n", input.id,
+               //input.name, input.categories[1], input.passwords[0].title, input.passwords[1].title);
         people[count] = input;
         count++;
     }
@@ -211,7 +211,7 @@ int findPersonByName(struct person *people, char *name)
     return 0;
 }
 
-struct person* findPersonById(struct person *people, int id)
+struct person *findPersonById(struct person *people, int id)
 {
     for (int i = 0; i < sizeof(people); i++)
     {
@@ -226,29 +226,47 @@ struct person* findPersonById(struct person *people, int id)
 int loginPerson(struct person *people, char *name, char *password)
 {
     int id = findPersonByName(people, name);
- 
+
     if (id != 0)
-    {   
-        if (strcmp(people[id-1].masterPassword, password) == 0)
+    {
+        if (strcmp(people[id - 1].masterPassword, password) == 0)
         {
-            return id; //correct password and name
+            return id; // correct password and name
         }
     }
     else
-        return 0; //wrong name
+        return 0; // wrong name
 
-    return -1; //wrong password
+    return -1; // wrong password
 }
 
-int registerPerson(struct person *people, char *name, char *password)
+int getNumberOfPeople(struct person *people)
+{
+    int count = 0;
+    for (int i = 0; i < sizeof(people); i++)
+    {
+        if (people[i].id != 0)
+            count++;
+        else
+            break;
+    }
+    return count;
+}
+
+struct person registerPerson(struct person *people, char *name, char *password)
 {
     int id = findPersonByName(people, name);
     if (id == 0)
     {
-       //struct person newPerson = {sizeof(people), name, password, {}, {}};
-       //people[sizeof(people)] = newPerson;
-        return 1;
+        char categories[30][30];
+        char passwords[30][30];
+        int position = getNumberOfPeople(people);
+        people[position].id = position+1;
+        strcpy(people[position].name, name);
+        strcpy(people[position].masterPassword, password);
+       
+       
     }
-    else
-        return 0; //name already exists
+   
+   return *people;
 }

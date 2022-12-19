@@ -70,8 +70,9 @@ int main(int argc, char *argv[])
     printf("[client]Command: ");
     strcpy(client_msg, "");
     fflush(stdout);
-    read(0, client_msg, sizeof(client_msg));
-    //client_msg[strlen(client_msg) - 1] = '\0';
+    fgets(client_msg, sizeof(client_msg), stdin);
+    // read(0, client_msg, sizeof(client_msg));
+    client_msg[strlen(client_msg) - 1] = '\0';
     
 
     printf("[client]We got [%s]\n", client_msg);
