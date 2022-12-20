@@ -163,8 +163,23 @@ struct person *editPassword(struct person *people, int id, char *title, int fiel
     return people;
 }
 
-struct person *deletePassword(int id, char *title)
+struct person *deletePassword( struct person *myPerson, char *title)
 {
+    for (int j = 0; j < 20; j++)
+    {
+        if (strcmp(myPerson->passwords[j].title, title) == 0)
+        {
+            strcpy(myPerson->passwords[j].category, "");
+            strcpy(myPerson->passwords[j].title, "");
+            strcpy(myPerson->passwords[j].username, "");
+            strcpy(myPerson->passwords[j].passwrd, "");
+            strcpy(myPerson->passwords[j].url, "");
+            strcpy(myPerson->passwords[j].notes, "");
+            break;
+        }
+    }
+
+    return myPerson;
 }
 
 char *printPers(struct person *myPerson)
@@ -184,7 +199,7 @@ char *printPers(struct person *myPerson)
             break;
         }
     }
-    
+
     return info;
 }
 
@@ -212,7 +227,24 @@ struct person *addCategory(int id, char *new_category)
 {
 }
 
-// struct person *addPassword(int id, )
+struct person *addPassword( struct person *myPerson, char *category, char *title, char *username, char *passwrd, char *url, char *notes)
+{
+    for (int i = 0; i < 20; i++)
+    {
+        if (myPerson->passwords[i].title[0] == '\0')
+        {
+            strcpy(myPerson->passwords[i].category, category);
+            strcpy(myPerson->passwords[i].title, title);
+            strcpy(myPerson->passwords[i].username, username);
+            strcpy(myPerson->passwords[i].passwrd, passwrd);
+            strcpy(myPerson->passwords[i].url, url);
+            strcpy(myPerson->passwords[i].notes, notes);
+            break;
+        }
+    }
+    return myPerson;
+}
+
 
 void viewCategory(int id, char *new_category)
 {

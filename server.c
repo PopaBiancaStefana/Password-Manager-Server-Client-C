@@ -244,6 +244,69 @@ void raspunde(void *arg)
 
     case 4:
       // add password
+      char categoryP[30] = "";
+      char titleP[30] = "";
+      char usernameP[30] = "";
+      char passwrdP[30] = "";
+      char urlP[50] = "";
+      char notesP[100] = "";
+
+      if (id_person == 0)
+      {
+        strcpy(server_msg, "Not logged in.\n");
+      }
+      else
+      {
+        for (int repetitions = 0; i < 6; i++)
+        {
+          if (categoryP[0] == '\0')
+            strcpy(server_msg, "Enter the category of the password:\n ");
+          else if (titleP[0] == '\0')
+            strcpy(server_msg, "Enter the title of the password:\n");
+          else if (usernameP[0] == '\0')
+            strcpy(server_msg, "Enter the username of the password:\n");
+          else if (passwrdP[0] == '\0')
+            strcpy(server_msg, "Enter the password:\n");
+          else if (urlP[0] == '\0')
+            strcpy(server_msg, "Enter the url of the password:\n");
+          else if (notesP[0] == '\0')
+            strcpy(server_msg, "Enter the notes of the password:\n");
+
+          if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
+          {
+            printf("[Thread %d] ", tdL.idThread);
+            perror("[Thread]Error at write() to client.\n");
+          }
+          else
+            printf("[Thread %d]Message sent.\n", tdL.idThread);
+
+          strcpy(client_msg, "");
+          if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+          {
+            printf("[Thread %d]\n", tdL.idThread);
+            perror("Error at read() from client.\n");
+          }
+          printf("[Thread %d]Message from client: %s\n", tdL.idThread, client_msg);
+
+          if (categoryP[0] == '\0')
+            strcpy(categoryP, client_msg);
+          else if (titleP[0] == '\0')
+            strcpy(titleP, client_msg);
+          else if (usernameP[0] == '\0')
+            strcpy(usernameP, client_msg);
+          else if (passwrdP[0] == '\0')
+            strcpy(passwrdP, client_msg);
+          else if (urlP[0] == '\0')
+            strcpy(urlP, client_msg);
+          else if (notesP[0] == '\0')
+          {
+            strcpy(notesP, client_msg);
+            addPassword(thisPerson, categoryP, titleP, usernameP, passwrdP, urlP, notesP);
+            printf("PASSWORD: %s %s %s %s %s %s\n", categoryP, titleP, usernameP, passwrdP, urlP, notesP);
+            strcpy(server_msg, "Password added.\n");
+          }
+        }
+      }
       break;
 
     case 5:
@@ -312,7 +375,7 @@ void raspunde(void *arg)
       else
       {
         char *response = printPers(thisPerson);
-        //printf("info: %s\n", response);
+        // printf("info: %s\n", response);
         strcpy(server_msg, response);
       }
       break;
