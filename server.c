@@ -125,8 +125,8 @@ static void *treat(void *arg)
 void raspunde(void *arg)
 {
   int i = 0;
-  char client_msg[800] = "";
-  char server_msg[800] = "";
+  char client_msg[4000] = "";
+  char server_msg[4000] = "";
   int id_person = 0;
 
   struct thData tdL;
@@ -139,7 +139,7 @@ void raspunde(void *arg)
   {
     strcat(server_msg, welcome);
 
-    if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
+    if (write(tdL.cl, &server_msg, sizeof(char[4000])) <= 0)
     {
       printf("[Thread %d] ", tdL.idThread);
       perror("[Thread]Error at write() to client.\n");
@@ -148,7 +148,7 @@ void raspunde(void *arg)
       printf("[Thread %d]Message sent.\n", tdL.idThread);
 
     strcpy(client_msg, "");
-    if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+    if (read(tdL.cl, &client_msg, sizeof(char[4000])) < 0)
     {
       printf("[Thread %d]\n", tdL.idThread);
       perror("Error at read() from client.\n");
@@ -174,7 +174,7 @@ void raspunde(void *arg)
         else if (password[0] == '\0')
           strcpy(server_msg, "Enter master password:\n");
 
-        if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
+        if (write(tdL.cl, &server_msg, sizeof(char[4000])) <= 0)
         {
           printf("[Thread %d] ", tdL.idThread);
           perror("[Thread]Error at write() to client.\n");
@@ -183,7 +183,7 @@ void raspunde(void *arg)
           printf("[Thread %d]Message sent.\n", tdL.idThread);
 
         strcpy(client_msg, "");
-        if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+        if (read(tdL.cl, &client_msg, sizeof(char[4000])) < 0)
         {
           printf("[Thread %d]\n", tdL.idThread);
           perror("Error at read() from client.\n");
@@ -244,6 +244,7 @@ void raspunde(void *arg)
 
     case 4:
       // add password
+      printf("AAAAAAAAAAAAAA");
       char categoryP[30] = "";
       char titleP[30] = "";
       char usernameP[30] = "";
@@ -257,8 +258,10 @@ void raspunde(void *arg)
       }
       else
       {
-        for (int repetitions = 0; i < 6; i++)
+        
+        for (int repetitions = 0; repetitions < 6; repetitions++)
         {
+            printf("BBBBBBBBBBBBBB");
           if (categoryP[0] == '\0')
             strcpy(server_msg, "Enter the category of the password:\n ");
           else if (titleP[0] == '\0')
@@ -272,7 +275,7 @@ void raspunde(void *arg)
           else if (notesP[0] == '\0')
             strcpy(server_msg, "Enter the notes of the password:\n");
 
-          if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
+          if (write(tdL.cl, &server_msg, sizeof(char[4000])) <= 0)
           {
             printf("[Thread %d] ", tdL.idThread);
             perror("[Thread]Error at write() to client.\n");
@@ -281,7 +284,7 @@ void raspunde(void *arg)
             printf("[Thread %d]Message sent.\n", tdL.idThread);
 
           strcpy(client_msg, "");
-          if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+          if (read(tdL.cl, &client_msg, sizeof(char[4000])) < 0)
           {
             printf("[Thread %d]\n", tdL.idThread);
             perror("Error at read() from client.\n");
@@ -330,7 +333,7 @@ void raspunde(void *arg)
         else
           strcpy(server_msg, "Enter the new value:\n");
 
-        if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
+        if (write(tdL.cl, &server_msg, sizeof(char[4000])) <= 0)
         {
           printf("[Thread %d] ", tdL.idThread);
           perror("[Thread]Error at write() to client.\n");
@@ -339,7 +342,7 @@ void raspunde(void *arg)
           printf("[Thread %d]Message sent.\n", tdL.idThread);
 
         strcpy(client_msg, "");
-        if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+        if (read(tdL.cl, &client_msg, sizeof(char[4000])) < 0)
         {
           printf("[Thread %d]\n", tdL.idThread);
           perror("Error at read() from client.\n");
@@ -374,7 +377,7 @@ void raspunde(void *arg)
         strcpy(server_msg, "Not logged in.\n");
       else
       {
-        char *response = printPers(thisPerson);
+        char *response = viewPasswords(thisPerson);
         // printf("info: %s\n", response);
         strcpy(server_msg, response);
       }
@@ -382,6 +385,34 @@ void raspunde(void *arg)
 
     case 7:
       // delete password
+      printf("[Thread %d]Delete password command.\n", tdL.idThread);
+
+      if (id_person == 0)
+        strcpy(server_msg, "Not logged in.\n");
+      else
+      {
+        strcpy(server_msg, "Enter the title of the password you want to delete:\n");
+
+        if (write(tdL.cl, &server_msg, sizeof(char[4000])) <= 0)
+        {
+          printf("[Thread %d] ", tdL.idThread);
+          perror("[Thread]Error at write() to client.\n");
+        }
+        else
+          printf("[Thread %d]Message sent.\n", tdL.idThread);
+
+        strcpy(client_msg, "");
+        if (read(tdL.cl, &client_msg, sizeof(char[4000])) < 0)
+        {
+          printf("[Thread %d]\n", tdL.idThread);
+          perror("Error at read() from client.\n");
+        }
+
+        printf("[Thread %d]Message from client: %s\n", tdL.idThread, client_msg);
+        deletePassword(thisPerson, client_msg);
+        strcpy(server_msg, "Password deleted.\n");
+
+      }
       break;
 
     case 8:

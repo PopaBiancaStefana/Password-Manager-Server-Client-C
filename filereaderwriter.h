@@ -163,7 +163,7 @@ struct person *editPassword(struct person *people, int id, char *title, int fiel
     return people;
 }
 
-struct person *deletePassword( struct person *myPerson, char *title)
+void deletePassword( struct person *myPerson, char *title)
 {
     for (int j = 0; j < 20; j++)
     {
@@ -179,55 +179,31 @@ struct person *deletePassword( struct person *myPerson, char *title)
         }
     }
 
-    return myPerson;
+   // return myPerson;
 }
 
-char *printPers(struct person *myPerson)
+char *viewPasswords(struct person *myPerson)
 {
-    char *chunk = malloc(800);
-    char *info = malloc(800);
+    char *chunk = malloc(4000);
+    char *info = malloc(4000);
 
     for (int j = 0; j < 20; j++)
     {
         if (myPerson->passwords[j].title[0] != '\0')
         {
-            snprintf(chunk, 800 ,"\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
+            snprintf(chunk, 4000 ,"\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
             strcat(info, chunk);
         }
-        else
-        {
-            break;
-        }
     }
-
     return info;
 }
 
-char *viewAllPasswords(struct person *myPerson)
-{
-    char *info;
-    char *temp;
-    strcpy(info, "");
-    strcpy(temp, "");
-
-    for (int j = 0; j < 20; j++)
-    {
-        if (myPerson->passwords[j].title[0] != '\0')
-        {
-            sprintf(temp, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
-            strcat(info, temp);
-        }
-    }
-
-    info[strlen(info)] = '\0';
-    return info;
-}
 
 struct person *addCategory(int id, char *new_category)
 {
 }
 
-struct person *addPassword( struct person *myPerson, char *category, char *title, char *username, char *passwrd, char *url, char *notes)
+void addPassword( struct person *myPerson, char *category, char *title, char *username, char *passwrd, char *url, char *notes)
 {
     for (int i = 0; i < 20; i++)
     {
@@ -242,7 +218,6 @@ struct person *addPassword( struct person *myPerson, char *category, char *title
             break;
         }
     }
-    return myPerson;
 }
 
 

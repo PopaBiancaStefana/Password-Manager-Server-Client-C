@@ -194,10 +194,6 @@ char *printPers(struct person *myPerson)
             snprintf(chunk, 800 ,"\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
             strcat(info, chunk);
         }
-        else
-        {
-            break;
-        }
     }
 
     return info;
@@ -352,7 +348,7 @@ int main()
 
     addPassword(thePerson, "alo", "das", "nunu", "uku", "fff", "e trrt");
 
-    deletePassword(thePerson, "csgo");
+    deletePassword(thePerson, "docs");
 
     char *info = printPers(thePerson);
     printf("info: %s\n", info);
