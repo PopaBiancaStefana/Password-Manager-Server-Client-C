@@ -167,30 +167,44 @@ struct person *deletePassword(int id, char *title)
 {
 }
 
-char *viewAllPasswords(struct person *people, int id)
+char *printPers(struct person *myPerson)
+{
+    char *chunk = malloc(800);
+    char *info = malloc(800);
+
+    for (int j = 0; j < 20; j++)
+    {
+        if (myPerson->passwords[j].title[0] != '\0')
+        {
+            snprintf(chunk, 800 ,"\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
+            strcat(info, chunk);
+        }
+        else
+        {
+            break;
+        }
+    }
+    
+    return info;
+}
+
+char *viewAllPasswords(struct person *myPerson)
 {
     char *info;
     char *temp;
     strcpy(info, "");
+    strcpy(temp, "");
 
-    for (int i = 0; i < getNumberOfPeople(people); i++)
+    for (int j = 0; j < 20; j++)
     {
-
-        if (people[i].id == id)
+        if (myPerson->passwords[j].title[0] != '\0')
         {
-            for (int j = 0; j < 20; j++)
-            {
-                if (strcmp(people[i].passwords[j].title, "") != 0)
-                {
-                    sprintf(temp, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", people[i].passwords[j].category, people[i].passwords[j].title, people[i].passwords[j].username, people[i].passwords[j].passwrd, people[i].passwords[j].url, people[i].passwords[j].notes);
-                    strcat(info, temp);
-                }
-            }
-            break;
+            sprintf(temp, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
+            strcat(info, temp);
         }
     }
 
-    info[strlen(info) - 1] = '\0';
+    info[strlen(info)] = '\0';
     return info;
 }
 

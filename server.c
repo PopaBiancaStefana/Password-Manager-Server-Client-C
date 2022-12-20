@@ -27,7 +27,6 @@ static void *treat(void *); /* functia executata de fiecare thread ce realizeaza
 void raspunde(void *);
 void readFromClient(int, int);
 
-
 struct person *people;
 
 int main()
@@ -199,11 +198,7 @@ void raspunde(void *arg)
 
           if (strcmp(command, "1") == 0)
           {
-
-            printf("AAAAAAAA\n");
             // register
-
-            
             thisPerson = registerPerson(username, password);
             if (thisPerson == NULL)
             {
@@ -212,13 +207,12 @@ void raspunde(void *arg)
             }
             else
             {
-             printf("Registered and connected:  %s\n", thisPerson->name);
-             id_person = thisPerson->id;
+              printf("Registered and connected:  %s\n", thisPerson->name);
+              id_person = thisPerson->id;
             }
           }
           else
           {
-            printf("CCCCCCCC");
             // login
             int check = loginPerson(username, password);
             thisPerson = findPersonById(check);
@@ -317,10 +311,10 @@ void raspunde(void *arg)
         strcpy(server_msg, "Not logged in.\n");
       else
       {
-        char *info = viewAllPasswords(people, 1);
-        printf("info: %s\n", info);
+        char *response = printPers(thisPerson);
+        //printf("info: %s\n", response);
+        strcpy(server_msg, response);
       }
-
       break;
 
     case 7:

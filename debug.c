@@ -167,30 +167,49 @@ struct person *deletePassword(int id, char *title)
 {
 }
 
-char *viewAllPasswords(struct person *people, int id)
+char *printPers(struct person *myPerson)
 {
+    char *chunk;
     char *info;
-    char *temp;
-    strcpy(info, "");
 
-    for (int i = 0; i < getNumberOfPeople(people); i++)
+    for (int j = 0; j < 20; j++)
     {
-
-        if (people[i].id == id)
+        if (myPerson->passwords[j].title[0] != '\0')
         {
-            for (int j = 0; j < 20; j++)
-            {
-                if (strcmp(people[i].passwords[j].title, "") != 0)
-                {
-                    sprintf(temp, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", people[i].passwords[j].category, people[i].passwords[j].title, people[i].passwords[j].username, people[i].passwords[j].passwrd, people[i].passwords[j].url, people[i].passwords[j].notes);
-                    strcat(info, temp);
-                }
-            }
+            
+            snprintf(chunk, 800 ,"\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
+            strcat(info, chunk);
+        }
+        else
+        {
             break;
         }
     }
 
-    info[strlen(info) - 1] = '\0';
+    //info[strlen(info)] = '\0';
+   
+    //printf("%d, %d, %s",strlen(info), strlen(chunk), returningInfo);
+     //printf("info: %s\n", chunk);
+    return info;
+}
+
+char *viewAllPasswords(struct person *myPerson)
+{
+    char *info;
+    char *temp;
+    strcpy(info, "");
+    strcpy(temp, "");
+
+    for (int j = 0; j < 20; j++)
+    {
+        if (myPerson->passwords[j].title[0] != '\0')
+        {
+            sprintf(temp, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
+            strcat(info, temp);
+        }
+    }
+
+    info[strlen(info)] = '\0';
     return info;
 }
 
@@ -291,6 +310,7 @@ int main()
     struct person *people = readFromFile();
 
     // printf("count %d", getNumberOfPeople(people));
+
     // people = editPassword(people, 1, "csgo", 1, "mama");
 
     //*people = registerPerson(people, "nami", "bastard");
@@ -301,19 +321,21 @@ int main()
     //      printf("id: %d, name: %s, masterPassword: %s, games: %s\n", people[i].id, people[i].name, people[i].masterPassword, people[i].passwords[0].title);
     //  }
 
-    // char *info = viewAllPasswords(people, 1);
-    // printf("info: %s\n", info);
+    struct person *thePerson = &input1;
 
-    struct person *thisPerson;
-    thisPerson = registerPerson("alin", "69dsdfs");
-    if (thisPerson == NULL)
-    {
-        printf("User already exists\n");
-    }
-    else
-    {
-        printf("Registered and connected  %s\n", thisPerson->name);
-    }
+    char *info = printPers(thePerson);
+    printf("info: %s\n", info);
+
+    // struct person *thisPerson;
+    // thisPerson = registerPerson("alin", "69dsdfs");
+    // if (thisPerson == NULL)
+    // {
+    //     printf("User already exists\n");
+    // }
+    // else
+    // {
+    //     printf("Registered and connected  %s\n", thisPerson->name);
+    // }
 
     return 0;
 }
