@@ -199,7 +199,10 @@ void raspunde(void *arg)
           if (strcmp(command, "1") == 0)
           {
             // register
+            printf("aaaaaaaaaaaaaaaa\n");
             thisPerson = registerPerson(username, password);
+
+             printf("bbbbbbbbbbbbbbbb\n");
             if (thisPerson == NULL)
             {
               strcpy(server_msg, "User already exists\n");
@@ -209,6 +212,7 @@ void raspunde(void *arg)
             {
               printf("Registered and connected:  %s\n", thisPerson->name);
               id_person = thisPerson->id;
+              strcpy(server_msg, "Registered and connected\n");
             }
           }
           else
@@ -239,12 +243,12 @@ void raspunde(void *arg)
     case 3:
       printf("[Thread %d]Logout command: %s\n", tdL.idThread, client_msg);
       id_person = 0;
+      thisPerson = NULL;
       strcpy(server_msg, "Logged out\n");
       break;
 
     case 4:
       // add password
-      printf("AAAAAAAAAAAAAA");
       char categoryP[30] = "";
       char titleP[30] = "";
       char usernameP[30] = "";
@@ -261,7 +265,6 @@ void raspunde(void *arg)
         
         for (int repetitions = 0; repetitions < 6; repetitions++)
         {
-            printf("BBBBBBBBBBBBBB");
           if (categoryP[0] == '\0')
             strcpy(server_msg, "Enter the category of the password:\n ");
           else if (titleP[0] == '\0')
@@ -427,5 +430,8 @@ void raspunde(void *arg)
       // change master password
       break;
     }
+
+  if(id_person != 0)
+    addPersonToFile(thisPerson);
   }
 }

@@ -24,9 +24,7 @@ typedef struct person
 
 void addPerson(struct person person)
 {
-
     FILE *outfile;
-
     // open file for writing
     outfile = fopen("person.dat", "a");
     if (outfile == NULL)
@@ -34,15 +32,74 @@ void addPerson(struct person person)
         fprintf(stderr, "\nError opened file\n");
         exit(1);
     }
-
     // write struct to file
-
     fwrite(&person, sizeof(struct person), 1, outfile);
+    if (fwrite == 0)
+        printf("error writing file !\n");
+    fclose(outfile);
+}
+
+
+void addPersonToFile(struct person *myPerson)
+{
+
+    FILE *infile, *copy;
+
+    // open file for writing
+    infile = fopen("person.dat", "r");
+    copy = fopen("copy.dat", "a");
+
+    if (infile == NULL)
+    {
+        fprintf(stderr, "\nError opened file\n");
+        exit(1);
+    }
+
+    printf("id= %d, name = %s\n", myPerson->id, myPerson->name);
+
+    struct person temporary;
+    while (fread(&temporary, sizeof(struct person), 1, infile))
+    {
+          printf("din fisier id= %d, name = %s\n", temporary.id,  temporary.name);
+        if (temporary.id != myPerson->id)
+        {
+            fwrite(&temporary, sizeof(struct person), 1, copy);
+
+            if (fwrite == 0)
+                printf("error writing file !\n");
+        }
+    }
+
+    struct person temp;
+    //copy myPerson to temp
+    temp.id = myPerson->id;
+    strcpy(temp.name, myPerson->name);
+    strcpy(temp.masterPassword, myPerson->masterPassword);
+    for (int i = 0; i < 20; i++)
+    {
+        strcpy(temp.categories[i], myPerson->categories[i]);
+    }
+    for (int i = 0; i < 20; i++)
+    {
+        strcpy(temp.passwords[i].category, myPerson->passwords[i].category);
+        strcpy(temp.passwords[i].title, myPerson->passwords[i].title);
+        strcpy(temp.passwords[i].username, myPerson->passwords[i].username);
+        strcpy(temp.passwords[i].passwrd, myPerson->passwords[i].passwrd);
+        strcpy(temp.passwords[i].url, myPerson->passwords[i].url);
+        strcpy(temp.passwords[i].notes, myPerson->passwords[i].notes);
+    }
+
+    fwrite(&temp, sizeof(struct person), 1, copy);
 
     if (fwrite == 0)
         printf("error writing file !\n");
 
-    fclose(outfile);
+    fclose(infile);
+    fclose(copy);
+
+   remove("person.dat");
+   rename("copy.dat", "person.dat");
+
 }
 
 void addPeopleToFile(struct person *input)
@@ -163,7 +220,7 @@ struct person *editPassword(struct person *people, int id, char *title, int fiel
     return people;
 }
 
-void deletePassword( struct person *myPerson, char *title)
+void deletePassword(struct person *myPerson, char *title)
 {
     for (int j = 0; j < 20; j++)
     {
@@ -179,7 +236,7 @@ void deletePassword( struct person *myPerson, char *title)
         }
     }
 
-   // return myPerson;
+    // return myPerson;
 }
 
 char *viewPasswords(struct person *myPerson)
@@ -191,19 +248,18 @@ char *viewPasswords(struct person *myPerson)
     {
         if (myPerson->passwords[j].title[0] != '\0')
         {
-            snprintf(chunk, 4000 ,"\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
+            snprintf(chunk, 4000, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
             strcat(info, chunk);
         }
     }
     return info;
 }
 
-
 struct person *addCategory(int id, char *new_category)
 {
 }
 
-void addPassword( struct person *myPerson, char *category, char *title, char *username, char *passwrd, char *url, char *notes)
+void addPassword(struct person *myPerson, char *category, char *title, char *username, char *passwrd, char *url, char *notes)
 {
     for (int i = 0; i < 20; i++)
     {
@@ -219,7 +275,6 @@ void addPassword( struct person *myPerson, char *category, char *title, char *us
         }
     }
 }
-
 
 void viewCategory(int id, char *new_category)
 {

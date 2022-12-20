@@ -24,9 +24,7 @@ typedef struct person
 
 void addPerson(struct person person)
 {
-
     FILE *outfile;
-
     // open file for writing
     outfile = fopen("person.dat", "a");
     if (outfile == NULL)
@@ -34,15 +32,74 @@ void addPerson(struct person person)
         fprintf(stderr, "\nError opened file\n");
         exit(1);
     }
-
     // write struct to file
-
     fwrite(&person, sizeof(struct person), 1, outfile);
+    if (fwrite == 0)
+        printf("error writing file !\n");
+    fclose(outfile);
+}
+
+
+void addPersonToFile(struct person *myPerson)
+{
+
+    FILE *infile, *copy;
+
+    // open file for writing
+    infile = fopen("person.dat", "r");
+    copy = fopen("copy.dat", "a");
+
+    if (infile == NULL)
+    {
+        fprintf(stderr, "\nError opened file\n");
+        exit(1);
+    }
+
+    printf("id= %d, name = %s\n", myPerson->id, myPerson->name);
+
+    struct person temporary;
+    while (fread(&temporary, sizeof(struct person), 1, infile))
+    {
+          printf("din fisier id= %d, name = %s\n", temporary.id,  temporary.name);
+        if (temporary.id != myPerson->id)
+        {
+            fwrite(&temporary, sizeof(struct person), 1, copy);
+
+            if (fwrite == 0)
+                printf("error writing file !\n");
+        }
+    }
+
+    struct person temp;
+    //copy myPerson to temp
+    temp.id = myPerson->id;
+    strcpy(temp.name, myPerson->name);
+    strcpy(temp.masterPassword, myPerson->masterPassword);
+    for (int i = 0; i < 20; i++)
+    {
+        strcpy(temp.categories[i], myPerson->categories[i]);
+    }
+    for (int i = 0; i < 20; i++)
+    {
+        strcpy(temp.passwords[i].category, myPerson->passwords[i].category);
+        strcpy(temp.passwords[i].title, myPerson->passwords[i].title);
+        strcpy(temp.passwords[i].username, myPerson->passwords[i].username);
+        strcpy(temp.passwords[i].passwrd, myPerson->passwords[i].passwrd);
+        strcpy(temp.passwords[i].url, myPerson->passwords[i].url);
+        strcpy(temp.passwords[i].notes, myPerson->passwords[i].notes);
+    }
+
+    fwrite(&temp, sizeof(struct person), 1, copy);
 
     if (fwrite == 0)
         printf("error writing file !\n");
 
-    fclose(outfile);
+    fclose(infile);
+    fclose(copy);
+
+   remove("person.dat");
+   rename("copy.dat", "person.dat");
+
 }
 
 void addPeopleToFile(struct person *input)
@@ -163,7 +220,7 @@ struct person *editPassword(struct person *people, int id, char *title, int fiel
     return people;
 }
 
-struct person *deletePassword( struct person *myPerson, char *title)
+void deletePassword(struct person *myPerson, char *title)
 {
     for (int j = 0; j < 20; j++)
     {
@@ -179,43 +236,22 @@ struct person *deletePassword( struct person *myPerson, char *title)
         }
     }
 
-    return myPerson;
+    // return myPerson;
 }
 
-char *printPers(struct person *myPerson)
+char *viewPasswords(struct person *myPerson)
 {
-    char *chunk = malloc(800);
-    char *info = malloc(800);
+    char *chunk = malloc(4000);
+    char *info = malloc(4000);
 
     for (int j = 0; j < 20; j++)
     {
         if (myPerson->passwords[j].title[0] != '\0')
         {
-            snprintf(chunk, 800 ,"\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
+            snprintf(chunk, 4000, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
             strcat(info, chunk);
         }
     }
-
-    return info;
-}
-
-char *viewAllPasswords(struct person *myPerson)
-{
-    char *info;
-    char *temp;
-    strcpy(info, "");
-    strcpy(temp, "");
-
-    for (int j = 0; j < 20; j++)
-    {
-        if (myPerson->passwords[j].title[0] != '\0')
-        {
-            sprintf(temp, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", myPerson->passwords[j].category, myPerson->passwords[j].title, myPerson->passwords[j].username, myPerson->passwords[j].passwrd, myPerson->passwords[j].url, myPerson->passwords[j].notes);
-            strcat(info, temp);
-        }
-    }
-
-    info[strlen(info)] = '\0';
     return info;
 }
 
@@ -223,7 +259,7 @@ struct person *addCategory(int id, char *new_category)
 {
 }
 
-struct person *addPassword( struct person *myPerson, char *category, char *title, char *username, char *passwrd, char *url, char *notes)
+void addPassword(struct person *myPerson, char *category, char *title, char *username, char *passwrd, char *url, char *notes)
 {
     for (int i = 0; i < 20; i++)
     {
@@ -238,9 +274,7 @@ struct person *addPassword( struct person *myPerson, char *category, char *title
             break;
         }
     }
-    return myPerson;
 }
-
 
 void viewCategory(int id, char *new_category)
 {
@@ -324,13 +358,15 @@ int main()
     struct person input1 = {1, "alin", "a", {"games", "school"}, {{"games", "csgo", "alintdg", "parola", "", "e veche"}, {"school", "docs", "alintutz", "parola22", "", "ok"}}};
     struct person input2 = {2, "elena", "6sdsafs", {"games", "acasa"}, {{"games", "lol", "nebula", "alorap", "haide.com", ""}, {"games", "dbdl", "balenciaga", "parlica", "", "brnr"}}};
 
-    // addPerson(input1);
-    // addPerson(input2);
+    //addPerson(input1);
+    //addPerson(input2);
     //  struct person manyP[2] ={{1, "alin", "69dsdfs", {"games", "school"}, {{"games", "csgo", "alintdg", "parola", "", "e veche"}, {"school", "docs", "alintutz", "parola22", "", "ok"}}},{2, "elena", "6sdsafs", {"games", "acasa"}, {{"games", "lol", "nebula", "alorap", "haide.com", ""}, {"games", "dbdl", "balenciaga", "parlica", "", "brnr"}}}};
 
     // deletePassword(2, "lol");
 
-    struct person *people = readFromFile();
+    struct person input3 = {3, "bianca", "ddds", {"dd", "as"}, {{"asd", "asd", "dasd", "sd", "haide.com", ""}, {"games", "dbdl", "baladasenciaga", "dsd", "", "sada"}}};
+
+   
 
     // printf("count %d", getNumberOfPeople(people));
 
@@ -338,20 +374,36 @@ int main()
 
     //*people = registerPerson(people, "nami", "bastard");
 
+ // struct person *thisPerson = &input3;
+   //addPersonToFile(thisPerson);
+    //print nr of people
+    struct person *people = readFromFile();
+
+    printf("person %d", findPersonByName(people,"alin"));
+
+    // int num[2] = {1,2};
+    // int *ptr = &num;
+
+    // int num2[2] = *(int *)ptr;
+
+    // printf("num2: %d %d\n", num2[0], num2[1]);
+
+
+
     // print people
     //  for (int i = 0; i < getNumberOfPeople(people); i++)
     //  {
     //      printf("id: %d, name: %s, masterPassword: %s, games: %s\n", people[i].id, people[i].name, people[i].masterPassword, people[i].passwords[0].title);
     //  }
 
-    struct person *thePerson = &input1;
+    // struct person *thePerson = &input1;
 
-    addPassword(thePerson, "alo", "das", "nunu", "uku", "fff", "e trrt");
+    // addPassword(thePerson, "alo", "das", "nunu", "uku", "fff", "e trrt");
 
-    deletePassword(thePerson, "docs");
+    // deletePassword(thePerson, "docs");
 
-    char *info = printPers(thePerson);
-    printf("info: %s\n", info);
+    // char *info = printPers(thePerson);
+    // printf("info: %s\n", info);
 
     // struct person *thisPerson;
     // thisPerson = registerPerson("alin", "69dsdfs");
