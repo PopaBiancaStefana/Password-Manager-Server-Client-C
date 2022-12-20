@@ -26,7 +26,7 @@ typedef struct thData
 static void *treat(void *); /* functia executata de fiecare thread ce realizeaza comunicarea cu clientii */
 void raspunde(void *);
 void readFromClient(int, int);
-char *passD(struct person *, int );
+
 
 struct person *people;
 
@@ -131,7 +131,7 @@ void raspunde(void *arg)
   int id_person = 0;
 
   struct thData tdL;
-  struct peron *thisPerson;
+  struct person *thisPerson;
   tdL = *((struct thData *)arg);
 
   char welcome[800] = "\n\n█▀█ ▄▀█ █▀ █▀ █░█░█ █▀█ █▀█ █▀▄   █▀▄▀█ ▄▀█ █▄░█ ▄▀█ █▀▀ █▀▀ █▀█\n█▀▀ █▀█ ▄█ ▄█ ▀▄▀▄▀ █▄█ █▀▄ █▄▀   █░▀░█ █▀█ █░▀█ █▀█ █▄█ ██▄ █▀▄\n\nWelcome!Type a number for a specific command\n\n1.register\n2.login\n3.logout\n4.Add password\n5.Edit password\n6.View all passwords\n7.Delete password\n8.New category\n9.View all categories\n10.Change master password\n\n";
@@ -196,23 +196,33 @@ void raspunde(void *arg)
         else if (password[0] == '\0')
         {
           strcpy(password, client_msg);
+
           if (strcmp(command, "1") == 0)
           {
 
+            printf("AAAAAAAA\n");
             // register
-            printf("\nINAINTE %d\n", getNumberOfPeople(people));
-            *people = registerPerson(people, username, password);
 
-            strcpy(server_msg, "Registered and connected\n");
-            id_person = people[getNumberOfPeople(people) - 1].id;
-
-            printf("\nDUPA %d  : id %d\n", getNumberOfPeople(people), id_person);
+            
+            thisPerson = registerPerson(username, password);
+            if (thisPerson == NULL)
+            {
+              strcpy(server_msg, "User already exists\n");
+              break;
+            }
+            else
+            {
+             printf("Registered and connected:  %s\n", thisPerson->name);
+             id_person = thisPerson->id;
+            }
           }
           else
           {
-
+            printf("CCCCCCCC");
             // login
-            int check = loginPerson(people, username, password);
+            int check = loginPerson(username, password);
+            thisPerson = findPersonById(check);
+
             if (check == 0)
             {
               strcpy(server_msg, "User does not exist\n");
@@ -307,7 +317,7 @@ void raspunde(void *arg)
         strcpy(server_msg, "Not logged in.\n");
       else
       {
-        char *info = passD(people, 1);
+        char *info = viewAllPasswords(people, 1);
         printf("info: %s\n", info);
       }
 
@@ -331,17 +341,3 @@ void raspunde(void *arg)
     }
   }
 }
-
-void readFromClient(int fd, int idThread)
-{
-  char client_msg[800] = "";
-
-  if (read(fd, &client_msg, sizeof(char[800])) < 0)
-  {
-    printf("[Thread %d]\n", idThread);
-    perror("Error at read() from client.\n");
-  }
-
-  printf("::%s", client_msg);
-}
-

@@ -226,8 +226,10 @@ int findPersonByName(struct person *people, char *name)
     return 0;
 }
 
-struct person *findPersonById(struct person *people, int id)
+struct person *findPersonById(int id)
 {
+    struct person *people = readFromFile();
+
     for (int i = 0; i < sizeof(people); i++)
     {
         if (people[i].id == id)
@@ -238,8 +240,10 @@ struct person *findPersonById(struct person *people, int id)
     return NULL;
 }
 
-int loginPerson(struct person *people, char *name, char *password)
+int loginPerson(char *name, char *password)
 {
+    struct person *people = readFromFile();
+
     int id = findPersonByName(people, name);
 
     if (id != 0)
@@ -255,18 +259,20 @@ int loginPerson(struct person *people, char *name, char *password)
     return -1; // wrong password
 }
 
-struct person registerPerson(struct person *people, char *name, char *password)
+struct person *registerPerson(char *name, char *password)
 {
+    struct person *people = readFromFile();
+
     int id = findPersonByName(people, name);
     if (id == 0)
     {
-        char categories[30][30];
-        char passwords[30][30];
+        struct person *myPerson;
         int position = getNumberOfPeople(people);
-        people[position].id = position + 1;
-        strcpy(people[position].name, name);
-        strcpy(people[position].masterPassword, password);
+        myPerson->id = position + 1;
+        strcpy(myPerson->name, name);
+        strcpy(myPerson->masterPassword, password);
+        return myPerson;
     }
-
-    return *people;
+    else
+        return NULL;
 }
