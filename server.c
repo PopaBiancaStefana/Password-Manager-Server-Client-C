@@ -26,6 +26,7 @@ typedef struct thData
 static void *treat(void *); /* functia executata de fiecare thread ce realizeaza comunicarea cu clientii */
 void raspunde(void *);
 void readFromClient(int, int);
+char *passD(struct person *, int );
 
 struct person *people;
 
@@ -130,9 +131,10 @@ void raspunde(void *arg)
   int id_person = 0;
 
   struct thData tdL;
+  struct peron *thisPerson;
   tdL = *((struct thData *)arg);
 
-  char welcome[800] = "\n\n█▀█ ▄▀█ █▀ █▀ █░█░█ █▀█ █▀█ █▀▄   █▀▄▀█ ▄▀█ █▄░█ ▄▀█ █▀▀ █▀▀ █▀█\n█▀▀ █▀█ ▄█ ▄█ ▀▄▀▄▀ █▄█ █▀▄ █▄▀   █░▀░█ █▀█ █░▀█ █▀█ █▄█ ██▄ █▀▄\n\nWelcome!Type a number for a specific command\n\n1.register\n2.login\n3.logout\n4.Add password\n5.Edit password\n6.View password\n7.Delete password\n8.New category\n9.View category\n10.Change master password\n\n";
+  char welcome[800] = "\n\n█▀█ ▄▀█ █▀ █▀ █░█░█ █▀█ █▀█ █▀▄   █▀▄▀█ ▄▀█ █▄░█ ▄▀█ █▀▀ █▀▀ █▀█\n█▀▀ █▀█ ▄█ ▄█ ▀▄▀▄▀ █▄█ █▀▄ █▄▀   █░▀░█ █▀█ █░▀█ █▀█ █▄█ ██▄ █▀▄\n\nWelcome!Type a number for a specific command\n\n1.register\n2.login\n3.logout\n4.Add password\n5.Edit password\n6.View all passwords\n7.Delete password\n8.New category\n9.View all categories\n10.Change master password\n\n";
 
   while (1)
   {
@@ -156,9 +158,9 @@ void raspunde(void *arg)
 
     server_msg[0] = '\0';
 
-    // register or login command
-    if ((strcmp(client_msg, "1") == 0 || strcmp(client_msg, "2") == 0) && id_person == 0)
+    switch (atoi(client_msg))
     {
+    case 1 ... 2:
       printf("[Thread %d]Register or login command: %s\n", tdL.idThread, client_msg);
       char command[800] = "";
       strcpy(command, client_msg);
@@ -200,7 +202,7 @@ void raspunde(void *arg)
             // register
             printf("\nINAINTE %d\n", getNumberOfPeople(people));
             *people = registerPerson(people, username, password);
-            
+
             strcpy(server_msg, "Registered and connected\n");
             id_person = people[getNumberOfPeople(people) - 1].id;
 
@@ -228,65 +230,105 @@ void raspunde(void *arg)
           done = 1;
         }
       }
-    }
-    else
+      break;
+
+    case 3:
+      printf("[Thread %d]Logout command: %s\n", tdL.idThread, client_msg);
+      id_person = 0;
+      strcpy(server_msg, "Logged out\n");
+      break;
+
+    case 4:
+      // add password
+      break;
+
+    case 5:
       // edit password command
-      if (strcmp(client_msg, "5") == 0)
+      printf("[Thread %d]Edit password command.\n", tdL.idThread);
+      char title[800] = "";
+      char field[800] = "";
+      done = 0;
+
+      if (id_person == 0)
       {
-        printf("[Thread %d]Edit password command.\n", tdL.idThread);
-        char title[800] = "";
-        char field[800] = "";
-        int done = 0;
+        strcpy(server_msg, "Not logged in.\n");
+      }
 
-        if (id_person == 0)
+      while (done == 0 && id_person != 0)
+      {
+        if (title[0] == '\0')
+          strcpy(server_msg, "Enter the title of the password you want to edit:\n ");
+        else if (field[0] == '\0')
+          strcpy(server_msg, "Enter the field you want to edit (1 for category, 2 for title, 3 for username, 4 for password, 5 for url, 6 for notes):\n");
+        else
+          strcpy(server_msg, "Enter the new value:\n");
+
+        if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
         {
-          strcpy(server_msg, "Not logged in.\n");
+          printf("[Thread %d] ", tdL.idThread);
+          perror("[Thread]Error at write() to client.\n");
         }
+        else
+          printf("[Thread %d]Message sent.\n", tdL.idThread);
 
-        while (done == 0 && id_person != 0)
+        strcpy(client_msg, "");
+        if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
         {
-          if (title[0] == '\0')
-            strcpy(server_msg, "Enter the title of the password you want to edit:\n ");
-          else if (field[0] == '\0')
-            strcpy(server_msg, "Enter the field you want to edit:\n");
-          else
-            strcpy(server_msg, "Enter the new value:\n");
+          printf("[Thread %d]\n", tdL.idThread);
+          perror("Error at read() from client.\n");
+        }
+        printf("[Thread %d]Message from client: %s\n", tdL.idThread, client_msg);
 
-          if (write(tdL.cl, &server_msg, sizeof(char[800])) <= 0)
-          {
-            printf("[Thread %d] ", tdL.idThread);
-            perror("[Thread]Error at write() to client.\n");
-          }
-          else
-            printf("[Thread %d]Message sent.\n", tdL.idThread);
+        if (title[0] == '\0')
+          strcpy(title, client_msg);
+        else if (field[0] == '\0')
+          strcpy(field, client_msg);
+        else
+        {
+          // printf("INAINTE: %s\n", viewPassword(people, id_person, title));
+          people = editPassword(people, id_person, title, atoi(field), client_msg);
 
-          strcpy(client_msg, "");
-          if (read(tdL.cl, &client_msg, sizeof(char[800])) < 0)
+          for (int i = 0; i < getNumberOfPeople(people); i++)
           {
-            printf("[Thread %d]\n", tdL.idThread);
-            perror("Error at read() from client.\n");
+            printf("id: %d, name: %s, masterPassword: %s, games: %s\n", people[i].id, people[i].name, people[i].masterPassword, people[i].passwords[0].title);
           }
 
-          // delete \n from client_msg
-          client_msg[strlen(client_msg) - 2] = '\0';
-
-          if (title[0] == '\0')
-            strcpy(title, client_msg);
-          else if (field[0] == '\0')
-            strcpy(field, client_msg);
-          else
-          {
-            // people = editPassword(people, 1, title, field, client_msg);
-            // if(strcmp(field, title) == 0)
-            // strcpy(title, client_msg);
-            printf("title: %s %s", title, field);
-
-            // char *info = viewPassword(people, 1, title);
-            //  strcpy(server_msg, info);
-            done = 1;
-          }
+          strcpy(server_msg, "Password updated.\n");
+          done = 1;
         }
       }
+      break;
+
+    case 6:
+      // view all passwords
+      printf("[Thread %d]View all passwords command.\n", tdL.idThread);
+
+      if (id_person == 0)
+        strcpy(server_msg, "Not logged in.\n");
+      else
+      {
+        char *info = passD(people, 1);
+        printf("info: %s\n", info);
+      }
+
+      break;
+
+    case 7:
+      // delete password
+      break;
+
+    case 8:
+      // new caregory
+      break;
+
+    case 9:
+      // view all categories
+      break;
+
+    case 10:
+      // change master password
+      break;
+    }
   }
 }
 
@@ -302,3 +344,4 @@ void readFromClient(int fd, int idThread)
 
   printf("::%s", client_msg);
 }
+

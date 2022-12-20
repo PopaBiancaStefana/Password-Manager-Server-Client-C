@@ -87,8 +87,8 @@ struct person *readFromFile()
     int count = 0;
     while (fread(&input, sizeof(struct person), 1, infile))
     {
-       // printf("id = %d name = %s %s %s %s\n", input.id,
-               //input.name, input.categories[1], input.passwords[0].title, input.passwords[1].title);
+        // printf("id = %d name = %s %s %s %s\n", input.id,
+        // input.name, input.categories[1], input.passwords[0].title, input.passwords[1].title);
         people[count] = input;
         count++;
     }
@@ -99,20 +99,32 @@ struct person *readFromFile()
     return returningPeople;
 }
 
-struct person *editPassword(struct person *people, int id, char *title, char *field, char *new_value)
+int getNumberOfPeople(struct person *people)
 {
+    int count = 0;
     for (int i = 0; i < sizeof(people); i++)
+    {
+        if (people[i].id != 0)
+            count++;
+        else
+            break;
+    }
+    return count;
+}
+
+struct person *editPassword(struct person *people, int id, char *title, int field, char *new_value)
+{
+    for (int i = 0; i < getNumberOfPeople(people); i++)
     {
 
         if (people[i].id == id)
         {
-            for (int j = 0; j < sizeof(people[i].passwords); j++)
+            for (int j = 0; j < 20; j++)
             {
 
                 if (strcmp(people[i].passwords[j].title, title) == 0)
                 {
-
-                    switch (5)
+                    switch (field)
                     {
                     case 1: // category
                         strcpy(people[i].passwords[j].category, new_value);
@@ -155,35 +167,38 @@ struct person *deletePassword(int id, char *title)
 {
 }
 
-char *viewPassword(struct person *people, int id, char *title)
+char *viewAllPasswords(struct person *people, int id)
 {
     char *info;
+    char *temp;
     strcpy(info, "");
 
-    for (int i = 0; i < sizeof(people); i++)
+    for (int i = 0; i < getNumberOfPeople(people); i++)
     {
 
         if (people[i].id == id)
         {
-            for (int j = 0; j < sizeof(people[i].passwords); j++)
+            for (int j = 0; j < 20; j++)
             {
-
-                if (people[i].passwords[j].title != NULL && strcmp(people[i].passwords[j].title, title) == 0)
+                if (strcmp(people[i].passwords[j].title, "") != 0)
                 {
-                    sprintf(info, "category: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", people[i].passwords[j].category, people[i].passwords[j].title, people[i].passwords[j].username, people[i].passwords[j].passwrd, people[i].passwords[j].url, people[i].passwords[j].notes);
-                    break;
+                    sprintf(temp, "\ncategory: %s,\ntitle: %s,\nusername: %s, \npassword: %s, \nurl: %s, \nnotes: %s\n", people[i].passwords[j].category, people[i].passwords[j].title, people[i].passwords[j].username, people[i].passwords[j].passwrd, people[i].passwords[j].url, people[i].passwords[j].notes);
+                    strcat(info, temp);
                 }
             }
             break;
         }
     }
 
+    info[strlen(info) - 1] = '\0';
     return info;
 }
 
 struct person *addCategory(int id, char *new_category)
 {
 }
+
+// struct person *addPassword(int id, )
 
 void viewCategory(int id, char *new_category)
 {
@@ -240,19 +255,6 @@ int loginPerson(struct person *people, char *name, char *password)
     return -1; // wrong password
 }
 
-int getNumberOfPeople(struct person *people)
-{
-    int count = 0;
-    for (int i = 0; i < sizeof(people); i++)
-    {
-        if (people[i].id != 0)
-            count++;
-        else
-            break;
-    }
-    return count;
-}
-
 struct person registerPerson(struct person *people, char *name, char *password)
 {
     int id = findPersonByName(people, name);
@@ -261,39 +263,40 @@ struct person registerPerson(struct person *people, char *name, char *password)
         char categories[30][30];
         char passwords[30][30];
         int position = getNumberOfPeople(people);
-        people[position].id = position+1;
+        people[position].id = position + 1;
         strcpy(people[position].name, name);
         strcpy(people[position].masterPassword, password);
-       
-       
     }
-   
-   return *people;
-}
 
+    return *people;
+}
 
 int main()
 {
-    struct person input1 = {1, "alin", "69dsdfs", {"games", "school"}, {{"games", "csgo", "alintdg", "parola", "", "e veche"}, {"school", "docs", "alintutz", "parola22", "", "ok"}}};
+    struct person input1 = {1, "alin", "a", {"games", "school"}, {{"games", "csgo", "alintdg", "parola", "", "e veche"}, {"school", "docs", "alintutz", "parola22", "", "ok"}}};
     struct person input2 = {2, "elena", "6sdsafs", {"games", "acasa"}, {{"games", "lol", "nebula", "alorap", "haide.com", ""}, {"games", "dbdl", "balenciaga", "parlica", "", "brnr"}}};
 
-     //addPerson(input1);
-     //addPerson(input2);
+    // addPerson(input1);
+    // addPerson(input2);
     //  struct person manyP[2] ={{1, "alin", "69dsdfs", {"games", "school"}, {{"games", "csgo", "alintdg", "parola", "", "e veche"}, {"school", "docs", "alintutz", "parola22", "", "ok"}}},{2, "elena", "6sdsafs", {"games", "acasa"}, {{"games", "lol", "nebula", "alorap", "haide.com", ""}, {"games", "dbdl", "balenciaga", "parlica", "", "brnr"}}}};
 
     // deletePassword(2, "lol");
 
     struct person *people = readFromFile();
 
-    //printf("count %d", getNumberOfPeople(people));
-    // people = editPassword(people, 2, "lol", 2, "mario");
+    // printf("count %d", getNumberOfPeople(people));
+    // people = editPassword(people, 1, "csgo", 1, "mama");
 
-    *people = registerPerson(people, "nami", "bastard");
+    //*people = registerPerson(people, "nami", "bastard");
 
-     //print people
-    for (int i = 0; i < getNumberOfPeople(people); i++){
-        printf("id: %d, name: %s, masterPassword: %s, categories: \n", people[i].id, people[i].name, people[i].masterPassword, people[i].categories[0]);
-    }
+    //print people
+    // for (int i = 0; i < getNumberOfPeople(people); i++)
+    // {
+    //     printf("id: %d, name: %s, masterPassword: %s, games: %s\n", people[i].id, people[i].name, people[i].masterPassword, people[i].passwords[0].title);
+    // }
+
+    char *info = viewAllPasswords(people, 1);
+    printf("info: %s\n", info);
 
     return 0;
 }
