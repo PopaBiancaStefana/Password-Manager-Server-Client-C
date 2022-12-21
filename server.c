@@ -376,14 +376,7 @@ void raspunde(void *arg)
           strcpy(field, client_msg);
         else
         {
-          // printf("INAINTE: %s\n", viewPassword(people, id_person, title));
-          // people = editPassword(people, id_person, title, atoi(field), client_msg);
-
-          // for (int i = 0; i < getNumberOfPeople(people); i++)
-          // {
-          //   printf("id: %d, name: %s, masterPassword: %s, games: %s\n", people[i].id, people[i].name, people[i].masterPassword, people[i].passwords[0].title);
-          // }
-
+          editPassword(thisPerson, title, atoi(field), client_msg);
           strcpy(server_msg, "Password updated.\n");
           done = 1;
         }
@@ -437,6 +430,22 @@ void raspunde(void *arg)
 
     case 8:
       // view all categories
+      printf("[Thread %d]View all categories command.\n", tdL.idThread);
+      if(id_person == 0)
+        strcpy(server_msg, "Not logged in.\n");
+      else
+      {
+        char categories[800] = "CATEGORIES:  ";
+        for (int i = 0; i < 20; i++)
+        {
+          if (thisPerson->passwords[i].title[0] != '\0'){
+            strcat(categories, thisPerson->passwords[i].category);  
+            strcat(categories, "  ");
+          }
+          
+        }
+        strcpy(server_msg, categories);
+      }
       break;
 
     case 9:

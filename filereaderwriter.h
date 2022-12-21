@@ -39,7 +39,6 @@ void addPerson(struct person person)
     fclose(outfile);
 }
 
-
 void addPersonToFile(struct person *myPerson)
 {
 
@@ -58,7 +57,7 @@ void addPersonToFile(struct person *myPerson)
     struct person temporary;
     while (fread(&temporary, sizeof(struct person), 1, infile))
     {
-        printf("din fisier id= %d, name = %s\n", temporary.id,  temporary.name);
+        printf("din fisier id= %d, name = %s\n", temporary.id, temporary.name);
         if (temporary.id != myPerson->id)
         {
             fwrite(&temporary, sizeof(struct person), 1, copy);
@@ -67,7 +66,6 @@ void addPersonToFile(struct person *myPerson)
                 printf("error writing file !\n");
         }
     }
-
 
     struct person temp;
 
@@ -88,7 +86,6 @@ void addPersonToFile(struct person *myPerson)
         strcpy(temp.passwords[i].notes, myPerson->passwords[i].notes);
     }
 
-
     fwrite(&temp, sizeof(struct person), 1, copy);
 
     if (fwrite == 0)
@@ -97,9 +94,8 @@ void addPersonToFile(struct person *myPerson)
     fclose(infile);
     fclose(copy);
 
-   remove("person.dat");
-   rename("copy.dat", "person.dat");
-
+    remove("person.dat");
+    rename("copy.dat", "person.dat");
 }
 
 void addPeopleToFile(struct person *input)
@@ -169,55 +165,45 @@ int getNumberOfPeople(struct person *people)
     return count;
 }
 
-struct person *editPassword(struct person *people, int id, char *title, int field, char *new_value)
+void editPassword(struct person *people, char *title, int field, char *new_value)
 {
-    for (int i = 0; i < getNumberOfPeople(people); i++)
+
+    for (int j = 0; j < 20; j++)
     {
 
-        if (people[i].id == id)
-        {
-            for (int j = 0; j < 20; j++)
+        if (strcmp(people->passwords[j].title, title) == 0)
+
+            switch (field)
             {
+            case 1: // category
+                strcpy(people->passwords[j].category, new_value);
+                break;
 
-                if (strcmp(people[i].passwords[j].title, title) == 0)
-                {
-                    switch (field)
-                    {
-                    case 1: // category
-                        strcpy(people[i].passwords[j].category, new_value);
-                        break;
+            case 2: // title
+                strcpy(people->passwords[j].title, new_value);
+                break;
 
-                    case 2: // title
-                        strcpy(people[i].passwords[j].title, new_value);
-                        break;
+            case 3: // username
+                strcpy(people->passwords[j].username, new_value);
+                break;
 
-                    case 3: // username
-                        strcpy(people[i].passwords[j].username, new_value);
-                        break;
+            case 4: // passwrd
+                strcpy(people->passwords[j].passwrd, new_value);
+                break;
 
-                    case 4: // passwrd
-                        strcpy(people[i].passwords[j].passwrd, new_value);
-                        break;
+            case 5: // url
+                strcpy(people->passwords[j].url, new_value);
+                break;
 
-                    case 5: // url
-                        strcpy(people[i].passwords[j].url, new_value);
-                        break;
+            case 6: // notes
+                strcpy(people->passwords[j].notes, new_value);
+                break;
 
-                    case 6: // notes
-                        strcpy(people[i].passwords[j].notes, new_value);
-                        break;
-
-                    default:
-                        break;
-                    }
-                    break;
-                }
+            default:
+                break;
             }
-            break;
-        }
+        break;
     }
-
-    return people;
 }
 
 void deletePassword(struct person *myPerson, char *title)
