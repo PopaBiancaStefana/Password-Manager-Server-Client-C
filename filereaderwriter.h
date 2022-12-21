@@ -55,12 +55,10 @@ void addPersonToFile(struct person *myPerson)
         exit(1);
     }
 
-    printf("id= %d, name = %s\n", myPerson->id, myPerson->name);
-
     struct person temporary;
     while (fread(&temporary, sizeof(struct person), 1, infile))
     {
-          printf("din fisier id= %d, name = %s\n", temporary.id,  temporary.name);
+        printf("din fisier id= %d, name = %s\n", temporary.id,  temporary.name);
         if (temporary.id != myPerson->id)
         {
             fwrite(&temporary, sizeof(struct person), 1, copy);
@@ -70,8 +68,9 @@ void addPersonToFile(struct person *myPerson)
         }
     }
 
+
     struct person temp;
-    //copy myPerson to temp
+
     temp.id = myPerson->id;
     strcpy(temp.name, myPerson->name);
     strcpy(temp.masterPassword, myPerson->masterPassword);
@@ -88,6 +87,7 @@ void addPersonToFile(struct person *myPerson)
         strcpy(temp.passwords[i].url, myPerson->passwords[i].url);
         strcpy(temp.passwords[i].notes, myPerson->passwords[i].notes);
     }
+
 
     fwrite(&temp, sizeof(struct person), 1, copy);
 

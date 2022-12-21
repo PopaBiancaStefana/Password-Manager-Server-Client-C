@@ -40,7 +40,7 @@ void addPerson(struct person person)
 }
 
 
-void addPersonToFile(struct person *myPerson)
+void addPersonToFile(struct person myPerson)
 {
 
     FILE *infile, *copy;
@@ -55,13 +55,13 @@ void addPersonToFile(struct person *myPerson)
         exit(1);
     }
 
-    printf("id= %d, name = %s\n", myPerson->id, myPerson->name);
+   // printf("id= %d, name = %s\n", myPerson->id, myPerson->name);
 
     struct person temporary;
     while (fread(&temporary, sizeof(struct person), 1, infile))
     {
           printf("din fisier id= %d, name = %s\n", temporary.id,  temporary.name);
-        if (temporary.id != myPerson->id)
+        if (temporary.id != myPerson.id)
         {
             fwrite(&temporary, sizeof(struct person), 1, copy);
 
@@ -70,26 +70,26 @@ void addPersonToFile(struct person *myPerson)
         }
     }
 
-    struct person temp;
+    //struct person temp;
     //copy myPerson to temp
-    temp.id = myPerson->id;
-    strcpy(temp.name, myPerson->name);
-    strcpy(temp.masterPassword, myPerson->masterPassword);
-    for (int i = 0; i < 20; i++)
-    {
-        strcpy(temp.categories[i], myPerson->categories[i]);
-    }
-    for (int i = 0; i < 20; i++)
-    {
-        strcpy(temp.passwords[i].category, myPerson->passwords[i].category);
-        strcpy(temp.passwords[i].title, myPerson->passwords[i].title);
-        strcpy(temp.passwords[i].username, myPerson->passwords[i].username);
-        strcpy(temp.passwords[i].passwrd, myPerson->passwords[i].passwrd);
-        strcpy(temp.passwords[i].url, myPerson->passwords[i].url);
-        strcpy(temp.passwords[i].notes, myPerson->passwords[i].notes);
-    }
+    // temp.id = myPerson->id;
+    // strcpy(temp.name, myPerson->name);
+    // strcpy(temp.masterPassword, myPerson->masterPassword);
+    // for (int i = 0; i < 20; i++)
+    // {
+    //     strcpy(temp.categories[i], myPerson->categories[i]);
+    // }
+    // for (int i = 0; i < 20; i++)
+    // {
+    //     strcpy(temp.passwords[i].category, myPerson->passwords[i].category);
+    //     strcpy(temp.passwords[i].title, myPerson->passwords[i].title);
+    //     strcpy(temp.passwords[i].username, myPerson->passwords[i].username);
+    //     strcpy(temp.passwords[i].passwrd, myPerson->passwords[i].passwrd);
+    //     strcpy(temp.passwords[i].url, myPerson->passwords[i].url);
+    //     strcpy(temp.passwords[i].notes, myPerson->passwords[i].notes);
+    // }
 
-    fwrite(&temp, sizeof(struct person), 1, copy);
+    fwrite(&myPerson, sizeof(struct person), 1, copy);
 
     if (fwrite == 0)
         printf("error writing file !\n");
@@ -374,12 +374,12 @@ int main()
 
     //*people = registerPerson(people, "nami", "bastard");
 
- // struct person *thisPerson = &input3;
-   //addPersonToFile(thisPerson);
+    struct person *thisPerson = &input3;
+   addPersonToFile(*thisPerson);
     //print nr of people
-    struct person *people = readFromFile();
+    // struct person *people = readFromFile();
 
-    printf("person %d", findPersonByName(people,"alin"));
+    // printf("person %d", findPersonByName(people,"alin"));
 
     // int num[2] = {1,2};
     // int *ptr = &num;

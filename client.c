@@ -66,6 +66,9 @@ int main(int argc, char *argv[])
     /* afisam mesajul primit */
     printf("[client]Message from server:\n\n%s\n", server_msg);
 
+    if(strcmp(server_msg, "Exit") == 0)
+      break;
+
     /* citirea mesajului */
     printf("[client]Command: ");
     strcpy(client_msg, "");

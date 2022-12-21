@@ -27,7 +27,8 @@ static void *treat(void *); /* functia executata de fiecare thread ce realizeaza
 void raspunde(void *);
 void readFromClient(int, int);
 
-struct person *people;
+// struct person *people;
+pthread_mutex_t lock;
 
 int main()
 {
@@ -76,7 +77,14 @@ int main()
   }
 
   // preluam datele din fisier
-  people = readFromFile();
+  // people = readFromFile();
+
+  // initializam mutex-ul
+  if (pthread_mutex_init(&lock, NULL) != 0)
+  {
+    printf("\n mutex init failed\n");
+    return 1;
+  }
 
   /* servim in mod concurent clientii...folosind thread-uri */
   while (1)
@@ -106,18 +114,20 @@ int main()
     td->cl = client;
 
     pthread_create(&th[i], NULL, &treat, td);
-
-  } // while
+  }
 };
+
 static void *treat(void *arg)
 {
   struct thData tdL;
   tdL = *((struct thData *)arg);
+  int fd = tdL.cl;
   printf("[thread]- %d -  Connected...\n", tdL.idThread);
   fflush(stdout);
   pthread_detach(pthread_self()); // eliberez memoria dupa ce threadul se opreste
   raspunde((struct thData *)arg);
   /* am terminat cu acest client, inchidem conexiunea */
+
   close((intptr_t)arg);
   return (NULL);
 };
@@ -128,12 +138,13 @@ void raspunde(void *arg)
   char client_msg[4000] = "";
   char server_msg[4000] = "";
   int id_person = 0;
+  int exit = 0;
 
   struct thData tdL;
   struct person *thisPerson;
   tdL = *((struct thData *)arg);
 
-  char welcome[800] = "\n\n█▀█ ▄▀█ █▀ █▀ █░█░█ █▀█ █▀█ █▀▄   █▀▄▀█ ▄▀█ █▄░█ ▄▀█ █▀▀ █▀▀ █▀█\n█▀▀ █▀█ ▄█ ▄█ ▀▄▀▄▀ █▄█ █▀▄ █▄▀   █░▀░█ █▀█ █░▀█ █▀█ █▄█ ██▄ █▀▄\n\nWelcome!Type a number for a specific command\n\n1.register\n2.login\n3.logout\n4.Add password\n5.Edit password\n6.View all passwords\n7.Delete password\n8.New category\n9.View all categories\n10.Change master password\n\n";
+  char welcome[800] = "\n\n█▀█ ▄▀█ █▀ █▀ █░█░█ █▀█ █▀█ █▀▄   █▀▄▀█ ▄▀█ █▄░█ ▄▀█ █▀▀ █▀▀ █▀█\n█▀▀ █▀█ ▄█ ▄█ ▀▄▀▄▀ █▄█ █▀▄ █▄▀   █░▀░█ █▀█ █░▀█ █▀█ █▄█ ██▄ █▀▄\n\nWelcome!Type a number for a specific command\n\n1.register\n2.login\n3.logout\n4.Add password\n5.Edit password\n6.View all passwords\n7.Delete password\n8.View all categories\n9.Change master password\n\n";
 
   while (1)
   {
@@ -199,10 +210,9 @@ void raspunde(void *arg)
           if (strcmp(command, "1") == 0)
           {
             // register
-            printf("aaaaaaaaaaaaaaaa\n");
+            printf("Registering\n");
             thisPerson = registerPerson(username, password);
 
-             printf("bbbbbbbbbbbbbbbb\n");
             if (thisPerson == NULL)
             {
               strcpy(server_msg, "User already exists\n");
@@ -211,6 +221,7 @@ void raspunde(void *arg)
             else
             {
               printf("Registered and connected:  %s\n", thisPerson->name);
+              printf("IIIIDDDD: %d\n", thisPerson->id);
               id_person = thisPerson->id;
               strcpy(server_msg, "Registered and connected\n");
             }
@@ -241,10 +252,17 @@ void raspunde(void *arg)
       break;
 
     case 3:
-      printf("[Thread %d]Logout command: %s\n", tdL.idThread, client_msg);
-      id_person = 0;
-      thisPerson = NULL;
-      strcpy(server_msg, "Logged out\n");
+
+      if (id_person == 0)
+      {
+        strcpy(server_msg, "Not logged in.\n");
+      }
+      else
+      {
+        // printf("[Thread %d]Logout command: %s\n", tdL.idThread, client_msg);
+        addPersonToFile(thisPerson);
+        exit = 1;
+      }
       break;
 
     case 4:
@@ -262,7 +280,7 @@ void raspunde(void *arg)
       }
       else
       {
-        
+
         for (int repetitions = 0; repetitions < 6; repetitions++)
         {
           if (categoryP[0] == '\0')
@@ -359,12 +377,12 @@ void raspunde(void *arg)
         else
         {
           // printf("INAINTE: %s\n", viewPassword(people, id_person, title));
-          people = editPassword(people, id_person, title, atoi(field), client_msg);
+          // people = editPassword(people, id_person, title, atoi(field), client_msg);
 
-          for (int i = 0; i < getNumberOfPeople(people); i++)
-          {
-            printf("id: %d, name: %s, masterPassword: %s, games: %s\n", people[i].id, people[i].name, people[i].masterPassword, people[i].passwords[0].title);
-          }
+          // for (int i = 0; i < getNumberOfPeople(people); i++)
+          // {
+          //   printf("id: %d, name: %s, masterPassword: %s, games: %s\n", people[i].id, people[i].name, people[i].masterPassword, people[i].passwords[0].title);
+          // }
 
           strcpy(server_msg, "Password updated.\n");
           done = 1;
@@ -414,24 +432,59 @@ void raspunde(void *arg)
         printf("[Thread %d]Message from client: %s\n", tdL.idThread, client_msg);
         deletePassword(thisPerson, client_msg);
         strcpy(server_msg, "Password deleted.\n");
-
       }
       break;
 
     case 8:
-      // new caregory
-      break;
-
-    case 9:
       // view all categories
       break;
 
-    case 10:
+    case 9:
       // change master password
+      printf("[Thread %d]Change master password command.\n", tdL.idThread);
+      if (id_person == 0)
+        strcpy(server_msg, "Not logged in.\n");
+      else
+      {
+        strcpy(server_msg, "Enter the new master password:\n");
+
+        if (write(tdL.cl, &server_msg, sizeof(char[4000])) <= 0)
+        {
+          printf("[Thread %d] ", tdL.idThread);
+          perror("[Thread]Error at write() to client.\n");
+        }
+        else
+          printf("[Thread %d]Message sent.\n", tdL.idThread);
+
+        strcpy(client_msg, "");
+        if (read(tdL.cl, &client_msg, sizeof(char[4000])) < 0)
+        {
+          printf("[Thread %d]\n", tdL.idThread);
+          perror("Error at read() from client.\n");
+        }
+
+        printf("[Thread %d]Message from client: %s\n", tdL.idThread, client_msg);
+        strcpy(thisPerson->masterPassword, client_msg);
+        strcpy(server_msg, "Master password edited.\n");
+      }
       break;
     }
 
-  if(id_person != 0)
-    addPersonToFile(thisPerson);
+    printf("este %d", exit);
+    if (exit == 1)
+    {
+      // close connection
+      strcpy(server_msg, "Exit");
+
+      if (write(tdL.cl, &server_msg, sizeof(char[4000])) <= 0)
+      {
+        printf("[Thread %d] ", tdL.idThread);
+        perror("[Thread]Error at write() to client.\n");
+      }
+      else
+        printf("[Thread %d]Message sent.\n", tdL.idThread);
+
+      break;
+    }
   }
 }
